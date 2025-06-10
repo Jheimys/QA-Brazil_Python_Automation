@@ -79,15 +79,31 @@ class TestUrbanRoutes:
 
     # Tarefa 3: Criar função para testar comentário para o motorista
     def test_comment_for_driver(self):
-        # Adicionar em S8
-        print("função criada para adicionar um comentário para o motorista")
-        pass
+        self.driver.get(data.URBAN_ROUTES_URL)
+
+        urban_routes_page = UrbanRoutesPage(self.driver)
+
+        self.driver.implicitly_wait(3)
+
+        urban_routes_page.enter_locations(data.ADDRESS_FROM, data.ADDRESS_TO)
+
+        urban_routes_page.select_plan()
+
+        urban_routes_page.comment_for_driver(data.MESSAGE_FOR_DRIVER)
 
     # Tarefa 3: Criar função para testar pedido de cobertor e lenços
     def test_order_blanket_and_handkerchiefs(self):
-        # Adicionar em S8
-        print("função criada para pedir cobertor e lenços")
-        pass
+        self.driver.get(data.URBAN_ROUTES_URL)
+
+        urban_routes_page = UrbanRoutesPage(self.driver)
+
+        self.driver.implicitly_wait(3)
+
+        urban_routes_page.enter_locations(data.ADDRESS_FROM, data.ADDRESS_TO)
+
+        urban_routes_page.select_plan()
+
+        urban_routes_page.order_blanket_and_handkerchiefs()
 
     # Tarefa 5: Criar função com loop para testar pedido de 2 sorvetes
     def test_order_2_ice_creams(self):

@@ -13,18 +13,34 @@ class UrbanRoutesPage:
     BTN_NEXT = (By.XPATH, '//button[@class="button full"]')
     CODE_INPUT = (By.ID, 'code')
     BTN_CONFIRM = (By.XPATH, '//button[@class="button full" and contains(text(),"Confirmar")]')
+
+    # 🆕 localizadores para o cartão
     INPUT_CARD = (By.XPATH, '//div[@class="pp-button filled"]')
     ADD_CARD = (By.XPATH,'//div[@class="pp-row disabled"]')
     ADD_CARD_NUMBER = (By.ID, 'number')
     ADD_CARD_CODE = (By.XPATH, '//input[@id="code" and @class="card-input"]')
     CLICK_CARD_TITlE = (By.XPATH, '//div[@class="head" and contains(text(),"Adicionar um cartão" )]')
     BTN_CARD_ADD = (By.XPATH,'//button[@class="button full" and contains(text(),"Adicionar" )]')
-    BTN_CLOSE_CARD = (By.CSS_SELECTOR, '.section.unusual .close-button.section-close')
+    BTN_CLOSE_CARD = (By.CSS_SELECTOR, '.payment-picker.open .close-button.section-close')
 
-    # 🆕 Novos localizadores
-    DRIVER_MESSAGE_INPUT = (By.XPATH, '//textarea[@placeholder="Mensagem para o motorista"]')
-    BLANKET_CHECKBOX = (By.XPATH, '//div[contains(@class, "option") and contains(text(), "Cobertor e lençóis")]')
-    ICE_CREAM_BUTTON = (By.XPATH, '//div[contains(@class, "option") and contains(text(), "Sorvete")]')
+    # 🆕 Mensagem para o motorista
+    INPUT_DRIVER_MESSAGE = (By.ID, 'comment')
+
+    # 🆕 Pedidos ao  motorista
+    ORDER_DRIVER = (By.XPATH, '//div[contains(@class, "reqs")]')
+    #CHECKBOX_INPUT = (By.XPATH, '//input[@type="checkbox" and @wfd-id="id8"]')
+    CHECKBOX_INPUT = (
+        By.XPATH,
+        '//div[@class="r-sw-label" and contains(text(), "Cobertor e lençóis")]'
+        '/following-sibling::div//input[@type="checkbox"]'
+    )
+
+    CHECKBOX_VISUAL = (
+        By.XPATH,
+        '//div[@class="r-sw-label" and contains(text(), "Cobertor e lençóis")]'
+    )
+
+    ICE_CREAM_BUTTON = (By.XPATH,'//div[contains(@class, "option") and contains(text(), "Sorvete")]')
 
     def __init__(self, driver):
         self.driver = driver
@@ -58,7 +74,7 @@ class UrbanRoutesPage:
         self.click_book_button()
         self.select_comfort()
 
-    # Telefone
+    # -------- Telefone ----------------------
     def click_input_phone(self):
         self.driver.find_element(*self.INPUT_PHONE).click()
 
@@ -100,7 +116,7 @@ class UrbanRoutesPage:
         self.enter_sms_code(sms_code)
         self.click_btn_confirm()
 
-    # Cartão
+    #--------- Cartão --------------------------------
     def enter_card(self):
         WebDriverWait(self.driver, 10).until(
             EC.element_to_be_clickable(self.INPUT_CARD)
@@ -128,27 +144,9 @@ class UrbanRoutesPage:
         self.driver.find_element(*self.BTN_CARD_ADD).click()
 
     def click_close_card(self):
-        try:
-            close_btn = WebDriverWait(self.driver, 10).until(
-                EC.presence_of_element_located(self.BTN_CLOSE_CARD)
-            )
-            WebDriverWait(self.driver, 10).until(
-                EC.visibility_of(close_btn)
-            )
-            if close_btn.is_enabled():
-                self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", close_btn)
-                WebDriverWait(self.driver, 5).until(
-                    EC.element_to_be_clickable(self.BTN_CLOSE_CARD)
-                )
-                close_btn.click()
-            else:
-                print("⚠️ Botão visível, mas desabilitado.")
-        except Exception as e:
-            print("⚠️ Erro ao clicar normalmente:", e)
-            try:
-                self.driver.execute_script("arguments[0].click();", close_btn)
-            except Exception as js_e:
-                print("❌ Erro no clique via JS:", js_e)
+        WebDriverWait(self.driver, 10).until(
+            EC.element_to_be_clickable(self.BTN_CLOSE_CARD)
+        ).click()
 
     def fill_card(self, number, code_number):
         self.enter_card()
@@ -159,16 +157,103 @@ class UrbanRoutesPage:
         self.click_card_btn_add()
         self.click_close_card()
 
-    # 🆕 Mensagem e itens extras
+    # ------ Mensagem  ----------------------------
     def write_driver_message(self, message):
         WebDriverWait(self.driver, 10).until(
-            EC.element_to_be_clickable(self.DRIVER_MESSAGE_INPUT)
+            EC.element_to_be_clickable(self.INPUT_DRIVER_MESSAGE)
         ).send_keys(message)
 
-    def select_blanket(self):
-        WebDriverWait(self.driver, 10).until(
-            EC.element_to_be_clickable(self.BLANKET_CHECKBOX)
-        ).click()
+    def comment_for_driver(self, message):
+        self.write_driver_message(message)
+
+    #------ Pedidos cobertor ---------------------
+    # def order_driver(self):
+    #     order_button = WebDriverWait(self.driver, 10).until(
+    #         EC.element_to_be_clickable(self.ORDER_DRIVER)
+    #     )
+    #     if "open" not in order_button.get_attribute("class"):
+    #         order_button.click()
+
+    # def checkbox_blanket(self):
+    #     WebDriverWait(self.driver, 10).until(
+    #         EC.element_to_be_clickable(self.CHECKBOX_INPUT)
+    #     ).click()
+
+    def order_driver(self):
+        order_section = WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located(self.ORDER_DRIVER)
+        )
+
+        if "open" not in order_section.get_attribute("class"):
+            order_section.click()
+            # Espera até que a classe 'open' esteja presente
+            WebDriverWait(self.driver, 5).until(
+                lambda d: "open" in d.find_element(*self.ORDER_DRIVER).get_attribute("class")
+            )
+
+    # def checkbox_blanket(self):
+    #     try:
+    #         visual_checkbox = WebDriverWait(self.driver, 10).until(
+    #             EC.element_to_be_clickable(self.CHECKBOX_VISUAL)
+    #         )
+    #         print("🟢 Checkbox visual localizado e clicável.")
+    #
+    #         self.driver.execute_script("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});",
+    #                                    visual_checkbox)
+    #         import time
+    #         time.sleep(1)  # para garantir scroll
+    #
+    #         print("⏸️ Pausando 2 segundos antes de clicar...")
+    #         time.sleep(2)
+    #
+    #         self.driver.execute_script("arguments[0].click();", visual_checkbox)
+    #
+    #         print("✅ Checkbox clicado com sucesso.")
+    #
+    #         # 🔎 Pausa para ver depois do clique
+    #         print("⏸️ Pausando 2 segundos após o clique...")
+    #         time.sleep(2)
+    #     except Exception as e:
+    #         print("❌ Erro ao clicar no visual do checkbox:", str(e))
+
+    def checkbox_blanket(self):
+        try:
+            checkbox_input = WebDriverWait(self.driver, 10).until(
+                EC.presence_of_element_located(self.CHECKBOX_INPUT)
+            )
+
+            self.driver.execute_script("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});",
+                                       checkbox_input)
+
+            import time
+            time.sleep(2)
+
+            # Marca o checkbox diretamente
+            self.driver.execute_script("arguments[0].checked = true;", checkbox_input)
+
+            # Dispara evento de mudança, se necessário
+            self.driver.execute_script("""
+                let event = new Event('change', { bubbles: true });
+                arguments[0].dispatchEvent(event);
+            """, checkbox_input)
+
+            time.sleep(1)
+
+            # Verifica se foi marcado
+            is_checked = self.driver.execute_script("return arguments[0].checked;", checkbox_input)
+            print(f"✅ Checkbox marcado? {is_checked}")
+
+        except Exception as e:
+            print("❌ Erro ao forçar marcação do checkbox:", str(e))
+
+    def order_blanket_and_handkerchiefs(self):
+        self.order_driver()
+        self.checkbox_blanket()
+
+    # def select_blanket(self):
+    #     WebDriverWait(self.driver, 10).until(
+    #         EC.element_to_be_clickable(self.BLANKET_CHECKBOX)
+    #     ).click()
 
     def order_ice_cream(self, quantity=2):
         for _ in range(quantity):
