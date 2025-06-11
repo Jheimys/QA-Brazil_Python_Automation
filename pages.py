@@ -1,6 +1,7 @@
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+import time
 
 class UrbanRoutesPage:
     # Localizadores
@@ -14,7 +15,7 @@ class UrbanRoutesPage:
     CODE_INPUT = (By.ID, 'code')
     BTN_CONFIRM = (By.XPATH, '//button[@class="button full" and contains(text(),"Confirmar")]')
 
-    # 🆕 localizadores para o cartão
+    # localizadores para o cartão
     INPUT_CARD = (By.XPATH, '//div[@class="pp-button filled"]')
     ADD_CARD = (By.XPATH,'//div[@class="pp-row disabled"]')
     ADD_CARD_NUMBER = (By.ID, 'number')
@@ -23,12 +24,11 @@ class UrbanRoutesPage:
     BTN_CARD_ADD = (By.XPATH,'//button[@class="button full" and contains(text(),"Adicionar" )]')
     BTN_CLOSE_CARD = (By.CSS_SELECTOR, '.payment-picker.open .close-button.section-close')
 
-    # 🆕 Mensagem para o motorista
+    # Mensagem para o motorista
     INPUT_DRIVER_MESSAGE = (By.ID, 'comment')
 
-    # 🆕 Pedidos ao  motorista
+    # Pedidos ao  motorista
     ORDER_DRIVER = (By.XPATH, '//div[contains(@class, "reqs")]')
-    #CHECKBOX_INPUT = (By.XPATH, '//input[@type="checkbox" and @wfd-id="id8"]')
     CHECKBOX_INPUT = (
         By.XPATH,
         '//div[@class="r-sw-label" and contains(text(), "Cobertor e lençóis")]'
@@ -40,7 +40,15 @@ class UrbanRoutesPage:
         '//div[@class="r-sw-label" and contains(text(), "Cobertor e lençóis")]'
     )
 
-    ICE_CREAM_BUTTON = (By.XPATH,'//div[contains(@class, "option") and contains(text(), "Sorvete")]')
+    # Pedidir 2 sorvetes
+    ICE_CREAM_BUTTON = (
+        By.XPATH,
+        '//div[@class="r-counter-label" and text()="Sorvete"]/following-sibling::div'
+        '//div[contains(@class,"counter-plus")]'
+    )
+
+    # Pedir taxi
+    BTN_ASK = (By.XPATH, '//button[@class="smart-button"]//span[text()="Pedir"]')
 
     def __init__(self, driver):
         self.driver = driver
@@ -167,18 +175,6 @@ class UrbanRoutesPage:
         self.write_driver_message(message)
 
     #------ Pedidos cobertor ---------------------
-    # def order_driver(self):
-    #     order_button = WebDriverWait(self.driver, 10).until(
-    #         EC.element_to_be_clickable(self.ORDER_DRIVER)
-    #     )
-    #     if "open" not in order_button.get_attribute("class"):
-    #         order_button.click()
-
-    # def checkbox_blanket(self):
-    #     WebDriverWait(self.driver, 10).until(
-    #         EC.element_to_be_clickable(self.CHECKBOX_INPUT)
-    #     ).click()
-
     def order_driver(self):
         order_section = WebDriverWait(self.driver, 10).until(
             EC.presence_of_element_located(self.ORDER_DRIVER)
@@ -191,31 +187,6 @@ class UrbanRoutesPage:
                 lambda d: "open" in d.find_element(*self.ORDER_DRIVER).get_attribute("class")
             )
 
-    # def checkbox_blanket(self):
-    #     try:
-    #         visual_checkbox = WebDriverWait(self.driver, 10).until(
-    #             EC.element_to_be_clickable(self.CHECKBOX_VISUAL)
-    #         )
-    #         print("🟢 Checkbox visual localizado e clicável.")
-    #
-    #         self.driver.execute_script("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});",
-    #                                    visual_checkbox)
-    #         import time
-    #         time.sleep(1)  # para garantir scroll
-    #
-    #         print("⏸️ Pausando 2 segundos antes de clicar...")
-    #         time.sleep(2)
-    #
-    #         self.driver.execute_script("arguments[0].click();", visual_checkbox)
-    #
-    #         print("✅ Checkbox clicado com sucesso.")
-    #
-    #         # 🔎 Pausa para ver depois do clique
-    #         print("⏸️ Pausando 2 segundos após o clique...")
-    #         time.sleep(2)
-    #     except Exception as e:
-    #         print("❌ Erro ao clicar no visual do checkbox:", str(e))
-
     def checkbox_blanket(self):
         try:
             checkbox_input = WebDriverWait(self.driver, 10).until(
@@ -225,8 +196,7 @@ class UrbanRoutesPage:
             self.driver.execute_script("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});",
                                        checkbox_input)
 
-            import time
-            time.sleep(2)
+            #time.sleep(2)
 
             # Marca o checkbox diretamente
             self.driver.execute_script("arguments[0].checked = true;", checkbox_input)
@@ -237,7 +207,7 @@ class UrbanRoutesPage:
                 arguments[0].dispatchEvent(event);
             """, checkbox_input)
 
-            time.sleep(1)
+            #time.sleep(1)
 
             # Verifica se foi marcado
             is_checked = self.driver.execute_script("return arguments[0].checked;", checkbox_input)
@@ -250,21 +220,29 @@ class UrbanRoutesPage:
         self.order_driver()
         self.checkbox_blanket()
 
-    # def select_blanket(self):
-    #     WebDriverWait(self.driver, 10).until(
-    #         EC.element_to_be_clickable(self.BLANKET_CHECKBOX)
-    #     ).click()
 
+#------ Pedir 2 sorvetes ---------------------------------------
     def order_ice_cream(self, quantity=2):
+        button = WebDriverWait(self.driver, 10).until(
+            EC.element_to_be_clickable(self.ICE_CREAM_BUTTON)
+        )
         for _ in range(quantity):
-            WebDriverWait(self.driver, 10).until(
-                EC.element_to_be_clickable(self.ICE_CREAM_BUTTON)
-            ).click()
+            button.click()
+            #time.sleep(1)
 
-    def final_steps(self, message="Olá motorista!", ice_cream_qty=2):
-        self.write_driver_message(message)
-        self.select_blanket()
-        self.order_ice_cream(ice_cream_qty)
+    def order_2_ice_creams(self):
+        self.order_driver()
+        self.order_ice_cream()
+
+#------------- Pedir taxi ------------------------
+    def btn_ask(self):
+        WebDriverWait(self.driver, 10).until(
+            EC.element_to_be_clickable(self.BTN_ASK)
+        ).click()
+        time.sleep(2)
+    def final_steps(self):
+        self.btn_ask()
+
 
 
 

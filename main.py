@@ -27,7 +27,7 @@ class TestUrbanRoutes:
 
     # Tarefa 3: Criar função para testar definição de rota
     def test_set_route(self):
-        self.driver.get('https://cnt-ecc42a4b-1cb0-4014-a027-3e8773c4046f.containerhub.tripleten-services.com/')
+        self.driver.get(data.URBAN_ROUTES_URL)
         urban_routes_page = UrbanRoutesPage(self.driver)
         # Adicione esperas implícitas para que os elementos da web tenham tempo de carregar
         self.driver.implicitly_wait(3)
@@ -35,7 +35,7 @@ class TestUrbanRoutes:
 
     # Tarefa 3: Criar função para testar seleção de plano
     def test_select_plan(self):
-        self.driver.get('https://cnt-cc682263-9464-4fe5-a62f-6a485c085000.containerhub.tripleten-services.com?lng=pt')
+        self.driver.get(data.URBAN_ROUTES_URL)
 
         urban_routes_page = UrbanRoutesPage(self.driver)
 
@@ -107,15 +107,46 @@ class TestUrbanRoutes:
 
     # Tarefa 5: Criar função com loop para testar pedido de 2 sorvetes
     def test_order_2_ice_creams(self):
-        # Adicionar em S8
-        print("função criada para pedir 2 sorvetes")
-        pass
+        self.driver.get(data.URBAN_ROUTES_URL)
+
+        urban_routes_page = UrbanRoutesPage(self.driver)
+
+        self.driver.implicitly_wait(3)
+
+        urban_routes_page.enter_locations(data.ADDRESS_FROM, data.ADDRESS_TO)
+
+        urban_routes_page.select_plan()
+
+        urban_routes_page.order_ice_cream()
 
     # Tarefa 3: Criar função para testar se o modelo de carro aparece na busca
-    def test_car_search_model_appears(self):
-        # Adicionar em S8
-        print("função criada para verificar se o modelo do carro aparece na busca")
-        pass
+    # def test_car_search_model_appears(self):
+    #     # Adicionar em S8
+    #     print("função criada para verificar se o modelo do carro aparece na busca")
+    #     pass
+
+    def test_final_steps(self):
+        self.driver.get(data.URBAN_ROUTES_URL)
+
+        urban_routes_page = UrbanRoutesPage(self.driver)
+
+        self.driver.implicitly_wait(3)
+
+        urban_routes_page.enter_locations(data.ADDRESS_FROM, data.ADDRESS_TO)
+
+        urban_routes_page.select_plan()
+
+        urban_routes_page.fill_phone_number(data.PHONE_NUMBER)
+
+        urban_routes_page.comment_for_driver(data.MESSAGE_FOR_DRIVER)
+
+        urban_routes_page.order_blanket_and_handkerchiefs()
+
+        urban_routes_page.order_ice_cream()
+
+        urban_routes_page.final_steps()
+
+
 
     @classmethod
     def teardown_class(cls):
