@@ -228,16 +228,12 @@ class UrbanRoutesPage:
 
     #------ Pedidos cobertor ---------------------
     def order_driver(self):
-        order_section = WebDriverWait(self.driver, 10).until(
-            EC.presence_of_element_located(self.ORDER_DRIVER)
+        # Aguarda todos os elementos visuais de checkbox (ex: r-sw-label) estarem presentes
+        checkbox_visuals = WebDriverWait(self.driver, 10).until(
+            EC.presence_of_all_elements_located(self.CHECKBOX_VISUAL)
         )
-
-        if "open" not in order_section.get_attribute("class"):
-            order_section.click()
-            # Espera até que a classe 'open' esteja presente
-            WebDriverWait(self.driver, 5).until(
-                lambda d: "open" in d.find_element(*self.ORDER_DRIVER).get_attribute("class")
-            )
+        # Clica na primeira opção visual (assumindo que é o cobertor)
+        checkbox_visuals[0].click()
 
     def checkbox_blanket(self):
         try:
@@ -267,6 +263,15 @@ class UrbanRoutesPage:
 
         except Exception as e:
             print("❌ Erro ao forçar marcação do checkbox:", str(e))
+
+    # ---- vesão mais simples apresenta bugs ---------------------
+    # def checkbox_blanket(self):
+    #     # Aguarda todos os checkboxes do tipo input[type="checkbox"]
+    #     checkboxes = WebDriverWait(self.driver, 10).until(
+    #         EC.presence_of_all_elements_located((By.XPATH, '//input[@type="checkbox"]'))
+    #     )
+    #     # Retorna se o primeiro checkbox está marcado
+    #     return checkboxes[0].is_selected()
 
     def is_blanket_checkbox_checked(self):
         checkbox_input = WebDriverWait(self.driver, 10).until(

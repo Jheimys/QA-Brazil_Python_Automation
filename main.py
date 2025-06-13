@@ -99,13 +99,12 @@ class TestUrbanRoutes:
         """
             Testa se, após preencher a mensagem para o motorista, o campo de input exibe o valor correto.
         """
-
         urban_routes_page = UrbanRoutesPage(self.driver)
         urban_routes_page.set_route(data.ADDRESS_FROM, data.ADDRESS_TO)
 
         urban_routes_page.select_plan()
 
-        urban_routes_page.comment_for_driver(data.MESSAGE_FOR_DRIVER)
+        urban_routes_page.write_driver_message(data.MESSAGE_FOR_DRIVER)
 
         actual_value = urban_routes_page.get_driver_message()
         expected_value = data.MESSAGE_FOR_DRIVER
