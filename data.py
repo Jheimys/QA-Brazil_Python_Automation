@@ -1,6 +1,6 @@
 # Arquivo com constantes
 
-URBAN_ROUTES_URL = 'https://cnt-3883c6f9-be5a-4c8b-9df8-829996bac5ee.containerhub.tripleten-services.com?lng=pt'
+URBAN_ROUTES_URL = 'https://cnt-8dd438fd-915c-4153-9289-0ed62243802b.containerhub.tripleten-services.com?lng=pt'
 
 ADDRESS_FROM = 	'East 2nd Street, 601'
 
